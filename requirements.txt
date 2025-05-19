@@ -1,0 +1,2 @@
+Django>=3.2,<4.0  # Spécifiez une version stable
+djangorestframework>=3.13,<3.14

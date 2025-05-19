@@ -1,0 +1,48 @@
+---
+name: CI/CD Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Vérifier le code source
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configuration du cache pip pour accélérer les installations
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Configuration du Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Construire l'image Docker
+      - name: Build Docker image
+        run: docker compose build
+
+      # Lancer les tests
+      - name: Run Tests
+        run: docker compose run --rm app sh -c "python manage.py test"
+
+      # Vérification de la qualité du code avec Flake8
+      - name: Run Linting
+        run: docker compose run --rm app sh -c "flake8"
+   
+
+
+
+
+
